@@ -42,6 +42,7 @@ import com.zhihu.matisse.internal.ui.widget.AlbumsSpinner;
 import com.zhihu.matisse.internal.utils.MediaStoreCompat;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Main Activity to display albums and media content (images/videos) in each album
@@ -168,6 +169,11 @@ public class MatisseActivity extends AppCompatActivity implements
 
         if (requestCode == REQUEST_CODE_CAPTURE) {
             mMediaStoreCompat.addToGallery();
+            data.putStringArrayListExtra(EXTRA_RESULT_SELECTION_PATH,
+                    new ArrayList<>(Collections.singletonList(
+                            mMediaStoreCompat.getCurrentPhotoPath())));
+            setResult(RESULT_OK, data);
+            finish();
         }
     }
 
