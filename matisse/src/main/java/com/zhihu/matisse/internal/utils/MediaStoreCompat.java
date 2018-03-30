@@ -19,10 +19,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.FileProvider;
 
 import com.zhihu.matisse.internal.entity.CaptureStrategy;
 import com.zhihu.matisse.internal.entity.SelectionSpec;
@@ -32,6 +34,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class MediaStoreCompat {
 
@@ -80,16 +83,25 @@ public class MediaStoreCompat {
 
             if (file != null) {
                 mCurrentMediaPath = file.getAbsolutePath();
-                mCurrentMediaUri = Uri.fromFile(file);
-
+                mCurrentMediaUri = FileProvider.getUriForFile(context, context.getPackageName(), file);
                 captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentMediaUri);
-
+                grantPermissionsForNeededPackages(context, captureIntent, mCurrentMediaUri);
                 if (mFragment != null) {
                     mFragment.get().startActivityForResult(captureIntent, requestCode);
                 } else {
                     mContext.get().startActivityForResult(captureIntent, requestCode);
                 }
             }
+        }
+    }
+
+    public void grantPermissionsForNeededPackages(Context context, Intent takePhotoIntent, Uri photoUri) {
+        List<ResolveInfo> resInfoList = context.getPackageManager()
+                .queryIntentActivities(takePhotoIntent,
+                        PackageManager.MATCH_DEFAULT_ONLY);
+        for (ResolveInfo resolveInfo : resInfoList) {
+            String packageName = resolveInfo.activityInfo.packageName;
+            context.grantUriPermission(packageName, photoUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         }
     }
 
@@ -111,8 +123,7 @@ public class MediaStoreCompat {
 
     private File createVideoFile() throws IOException {
 
-        File storageDir = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DCIM);
+        File storageDir = mContext.get().getExternalFilesDir(Environment.DIRECTORY_MOVIES);
 
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String fileName = "MP4_" + timeStamp + "_.mp4";
@@ -122,8 +133,7 @@ public class MediaStoreCompat {
 
     private File createImageFile() throws IOException {
 
-        File storageDir = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES);
+        File storageDir = mContext.get().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String fileName = "JPEG_" + timeStamp + "_.jpeg";
