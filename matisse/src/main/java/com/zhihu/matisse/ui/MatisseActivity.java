@@ -169,9 +169,9 @@ public class MatisseActivity extends AppCompatActivity implements
 
         if (requestCode == REQUEST_CODE_CAPTURE) {
             mMediaStoreCompat.addToGallery();
-            data.putStringArrayListExtra(EXTRA_RESULT_SELECTION_PATH,
-                    new ArrayList<>(Collections.singletonList(
-                            mMediaStoreCompat.getCurrentPhotoPath())));
+            ArrayList<String> selectedPaths = (ArrayList<String>) mSelectedCollection.asListOfString();
+            selectedPaths.add(mMediaStoreCompat.getCurrentPhotoPath());
+            data.putStringArrayListExtra(EXTRA_RESULT_SELECTION_PATH, selectedPaths);
             setResult(RESULT_OK, data);
             finish();
         }
