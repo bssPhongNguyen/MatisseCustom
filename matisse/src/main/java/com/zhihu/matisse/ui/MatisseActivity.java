@@ -167,6 +167,10 @@ public class MatisseActivity extends AppCompatActivity implements
         if (resultCode != RESULT_OK)
             return;
 
+        if (data == null) {
+            data = new Intent();
+        }
+
         if (requestCode == REQUEST_CODE_CAPTURE) {
             mMediaStoreCompat.addToGallery();
             ArrayList<String> selectedPaths = (ArrayList<String>) mSelectedCollection.asListOfString();
